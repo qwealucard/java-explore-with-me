@@ -1,6 +1,8 @@
 services:
   stats-server:
-    build: ./stats
+    build:
+      context: ./stats/server
+      dockerfile: ../Dockerfile
     ports:
       - "9090:9090"
     depends_on:
@@ -13,7 +15,9 @@ services:
       POSTGRES_DB: stats_db
 
   ewm-service:
-    build: ./main-service
+    build:
+      context: ./main-service
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     depends_on:
