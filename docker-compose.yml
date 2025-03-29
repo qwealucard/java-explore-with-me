@@ -1,14 +1,27 @@
 services:
   stats-server:
+    build: ./stats
     ports:
       - "9090:9090"
-
+    depends_on:
+      - stats-db
   stats-db:
     image: postgres:16.1
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: stats_db
 
   ewm-service:
+    build: ./main-service
     ports:
       - "8080:8080"
+    depends_on:
+      - ewm-db
 
   ewm-db:
     image: postgres:16.1
+    environment:
+      POSTGRES_USER: ewm_user
+      POSTGRES_PASSWORD: ewm_password
+      POSTGRES_DB: ewm_db
