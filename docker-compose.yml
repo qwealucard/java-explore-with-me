@@ -20,8 +20,10 @@ services:
       - ewm-db
 
   ewm-db:
+    ports:
+      - "6432:5432"
     image: postgres:16.1
     environment:
-      POSTGRES_USER: ewm_user
-      POSTGRES_PASSWORD: ewm_password
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 12345
       POSTGRES_DB: ewm_db

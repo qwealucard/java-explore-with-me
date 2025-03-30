@@ -16,9 +16,9 @@ public class StatsClient {
     private final RestClient restClient;
     private final String statsUrl;
 
-    public StatsClient(@Value("${stats-client.url}") String statsUrl) {
+    public StatsClient(@Value("${stats-server.url}") String statsUrl) {
         this.statsUrl = statsUrl;
-        this.restClient = RestClient.create();
+        this.restClient = RestClient.create(statsUrl);
     }
 
     public void hit(HitRequest hitDto) {
