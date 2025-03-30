@@ -1,5 +1,5 @@
 services:
-  stats-server:
+  server:
     build:
       context: ./stats/server
       dockerfile: ../Dockerfile
