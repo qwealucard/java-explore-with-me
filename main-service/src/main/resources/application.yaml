@@ -7,5 +7,5 @@ spring:
 
 ru.practicum.stats-client:
   server:
-    host: server
+    host: stats-server
     port: 9090
