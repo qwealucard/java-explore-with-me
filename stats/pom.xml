@@ -14,7 +14,7 @@
     <name>stats</name>
     <url>http://maven.apache.org</url>
     <modules>
-        <module>server</module>
+        <module>stats-server</module>
         <module>dto</module>
         <module>stats-client</module>
     </modules>

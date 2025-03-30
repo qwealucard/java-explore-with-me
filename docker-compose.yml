@@ -1,8 +1,6 @@
 services:
   stats-server:
-    build:
-      context: ./stats/server
-      dockerfile: /Dockerfile
+    build: /stats/stats-server
     ports:
       - "9090:9090"
     depends_on:
@@ -13,54 +11,9 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 12345
       POSTGRES_DB: stats_db
-
-  ewm-service:
-    build:
-      context: ./main-service
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - ewm-db
-
-  ewm-db:
-    image: postgres:16.1
-    environment:
-      POSTGRES_USER: ewm_user
-      POSTGRES_PASSWORD: ewm_password
-      POSTGRES_DB: ewm_db
-#services:
-#  stats-server:
-#    build: ./stats
-#    ports:
-#      - "9090:9090"
-#    environment:
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats_db
-#    depends_on:
-#      stats-db:
-#        condition: service_healthy
-#    healthcheck:
-#      test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-#
-#  stats-db:
-#    image: postgres:16.1
-#    environment:
-#      POSTGRES_USER: user
-#      POSTGRES_PASSWORD: 12345
-#      POSTGRES_DB: stats_db
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready -U user -d stats_db"]
-#      interval: 5s
-#      timeout: 5s
-#      retries: 5
 #
 #  ewm-service:
-#    build:
-#      context: ./main-service
-#      dockerfile: Dockerfile
+#    build: /main-service
 #    ports:
 #      - "8080:8080"
 #    depends_on:

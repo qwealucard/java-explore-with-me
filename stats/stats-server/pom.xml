@@ -8,10 +8,10 @@
     </parent>
 
     <groupId>ru.practicum</groupId>
-    <artifactId>server</artifactId>
+    <artifactId>stats-server</artifactId>
     <packaging>jar</packaging>
 
-    <name>server</name>
+    <name>stats-server</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -55,17 +55,15 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                 </plugin>
-            </plugins>
-        </pluginManagement>
+        </plugins>
     </build>
 </project>
