@@ -30,7 +30,7 @@ public class Compilation {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinTable(
             name = "compilations_events",
-            joinColumns = @JoinColumn(name = "compilation_id", referencedColumnName = "id"),
+            joinColumns = @JoinColumn(name = "compilations_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "id")
     )
     private List<Event> events;

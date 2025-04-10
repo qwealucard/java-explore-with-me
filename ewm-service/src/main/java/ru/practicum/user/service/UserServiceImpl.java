@@ -3,8 +3,10 @@ package ru.practicum.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
@@ -18,41 +20,44 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> getUsers(Integer from, Integer size, List<Long> ids) {
-        if(ids == null) {
-            List<User> users = userRepository.findAll(PageRequest.of(from / size, size)).toList();
-            return userMapper.toUserDto(users);
+        List<User> users;
+        if (ids == null || ids.isEmpty()) {
+            users = userRepository.findAll(PageRequest.of(from / size, size)).getContent();
+        } else {
+            users = userRepository.findByIdIn(ids, PageRequest.of(from / size, size)).getContent();
         }
-         List<UserDto> userDtos = new ArrayList<>();
-        for(Long id : ids) {
-            User user = userRepository.findById(id).orElseThrow(() -> {
-                log.error("User with ID {} not found", id);
-                return new NotFoundException("User not found");
-            });
-            userDtos.add(userMapper.toUserDto(user));
-        }
-        return userDtos;
+        return users.stream()
+                    .map(userMapper::toUserDto)
+                    .toList();
     }
+
 
     @Override
     @Transactional
     public UserDto createUser(NewUserRequest userRequest) {
-       User user = userRepository.save(userMapper.toUser(userRequest));
-       log.info("User with ID {} has been created", user.getId());
-       return userMapper.toUserDto(user);
+        if(userRepository.existsByEmail(userRequest.getEmail())) {
+            throw new ConflictException("This email is taken");
+        }
+        User user = userRepository.save(userMapper.toUser(userRequest));
+        log.info("User with ID {} has been created", user.getId());
+        return userMapper.toUserDto(user);
     }
 
     @Override
     @Transactional
     public void deleteUser(Long id) {
-        userRepository.findById(id);
-        userRepository.deleteById(id);
-        log.info("User with ID {} has been deleted", id);
+        if (userRepository.deleteUserById(id).isPresent()) {
+            log.info("User with ID {} has been deleted", id);
+        } else {
+            log.error("User with ID {} not found", id);
+            throw new NotFoundException("User not found");
+        }
     }
 }

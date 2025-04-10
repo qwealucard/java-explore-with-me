@@ -6,6 +6,7 @@ import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.UpdateCompilationDto;
 import ru.practicum.compilation.model.Compilation;
+import ru.practicum.event.model.Event;
 import ru.practicum.request.model.Request;
 
 import java.util.List;
@@ -14,11 +15,11 @@ import java.util.List;
 public interface CompilationMapper {
 
     @Mapping(target = "id", ignore = true)
-    Compilation toCompilation(NewCompilationDto compilationDto);
+    //@Mapping(target = "title", source = "title")
+    @Mapping(target = "events", source = "events")
+    Compilation toCompilation(NewCompilationDto compilationDto, List<Event> events);
 
     CompilationDto toCompilationDto(Compilation compilation);
 
-    @Mapping(target = "events.id", source = "events")
-    Compilation toCompilation(UpdateCompilationDto updateCompilationDto);
     List<CompilationDto> toCompilationDto(List<Compilation> compilations);
 }

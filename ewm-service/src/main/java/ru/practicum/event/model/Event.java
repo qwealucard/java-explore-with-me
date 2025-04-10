@@ -21,12 +21,16 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String annotation;
     private Boolean paid;
+
+    @Column(columnDefinition = "TEXT")
     private String title;
 
     private LocalDateTime eventDate;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private Boolean requestModeration;
@@ -45,10 +49,12 @@ public class Event {
     @JoinColumn(name = "user_id")
     private User initiator;
 
-    @ManyToOne
     @JoinColumn(name = "location_id")
+    @ManyToOne(cascade = CascadeType.MERGE)
     private Location location;
 
+    //@Column(name = "state", columnDefinition = "TEXT")
+    @Enumerated(EnumType.STRING)
     private EventState state;
 
     private Long confirmedRequests;

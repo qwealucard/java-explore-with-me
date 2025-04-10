@@ -9,6 +9,7 @@ import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.Request;
@@ -50,12 +51,16 @@ public class RequestServiceImpl implements RequestService{
             return new NotFoundException("Event not found");
         });
 
-        if(requestRepository.existsByEventIdAndRequesterId(userId, eventId)) {
-            throw  new ConflictException("You can't add a repeat request");
+        if(requestRepository.existsByEventIdAndRequesterId(eventId, userId)) {
+            throw new ConflictException("You can't add a repeat request");
         }
 
         if(userId.equals(event.getInitiator().getId())) {
             throw new ConflictException("The initiator of the event cannot add a request to participate in his event");
+        }
+
+        if(event.getState() != EventState.PUBLISHED) {
+            throw new ConflictException("This event is unpublished");
         }
 
         if(event.getConfirmedRequests() >= event.getParticipantLimit()) {
@@ -67,35 +72,32 @@ public class RequestServiceImpl implements RequestService{
         }
         Request request = new Request();
         request.setCreated(LocalDateTime.now());
-        request.setEvent(eventRepository.findById(eventId).orElseThrow(() -> {
-            log.error("Event with ID {} not found", eventId);
-            return new NotFoundException("Event not found");
-        }));
-        request.setRequester(userRepository.findById(userId).orElseThrow(() -> {
-            log.error("User with ID {} not found", userId);
-            return new NotFoundException("User not found");
-        }));
+        request.setEvent(event);
+        request.setRequester(user);
         request.setStatus(RequestStatus.PENDING);
-
-        if(event.getState() != EventState.PUBLISHED) {
-            throw new ConflictException("You cannot participate in an unpublished event");
-        }
 
         return requestMapper.toParticipationRequestDto(requestRepository.save(request));
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
+        userRepository.findById(userId);
         Request request = requestRepository.findById(requestId).orElseThrow(() -> {
             log.error("Request with ID {} not found", requestId);
             return new NotFoundException("Request not found");
         });
 
-        userRepository.findById(userId);
+//        if (!request.getRequester().getId().equals(userId)) {
+//            throw new ValidationException("Only the creator can cancel the request.");
+//        }
+//        if (request.getStatus() == RequestStatus.CANCELED) {
+//            throw new ConflictException("Request has already been canceled");
+//        }
 
         request.setStatus(RequestStatus.CANCELED);
-        return requestMapper.toParticipationRequestDto(request);
+
+        return requestMapper.toParticipationRequestDto(requestRepository.save(request));
     }
 
 

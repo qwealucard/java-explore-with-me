@@ -11,6 +11,7 @@ import ru.practicum.compilation.dto.UpdateCompilationDto;
 import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.compilation.repository.CompilationRepository;
+import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.NotFoundException;
 
@@ -27,8 +28,9 @@ public class CompilationServiceImpl implements CompilationService{
     @Override
     @Transactional
     public CompilationDto createCompilation(NewCompilationDto compilationDto) {
-        Compilation compilation = compilationMapper.toCompilation(compilationDto);
-
+        List<Long> eventsIds = compilationDto.getEvents();
+        List<Event> events = eventRepository.findAllById(eventsIds);
+        Compilation compilation = compilationMapper.toCompilation(compilationDto, events);
         return compilationMapper.toCompilationDto(compilationRepository.save(compilation));
     }
 
@@ -53,7 +55,7 @@ public class CompilationServiceImpl implements CompilationService{
         if(updateCompilationDto.getTitle() != null) {
             existingCompilation.setTitle(updateCompilationDto.getTitle());
         }
-        existingCompilation.setPinned(updateCompilationDto.isPinned());
+        existingCompilation.setPinned(updateCompilationDto.getPinned());
         return compilationMapper.toCompilationDto(compilationRepository.save(existingCompilation));
     }
 

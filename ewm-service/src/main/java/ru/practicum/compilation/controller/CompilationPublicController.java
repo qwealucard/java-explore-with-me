@@ -19,7 +19,7 @@ import java.util.List;
 public class CompilationPublicController {
     private final CompilationService compilationService;
 
-    @GetMapping("/{compId")
+    @GetMapping("/{compId}")
     public ResponseEntity<CompilationDto> getCompilationById(@PathVariable Long compId) {
         return new ResponseEntity<CompilationDto>(compilationService.getCompilationById(compId), HttpStatus.OK);
     }

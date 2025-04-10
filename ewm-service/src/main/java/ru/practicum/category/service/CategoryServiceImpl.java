@@ -13,6 +13,7 @@ import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.AlreadyExistsException;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ImpossibleActionException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.model.User;
@@ -34,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryMapper.toCategory(categoryDto);
 
         if (categoryRepository.existsByName(category.getName())) {
-            throw new AlreadyExistsException("That name is taken.");
+            throw new ConflictException("That name is taken.");
         }
 
         log.info("create category by admin, category ID:{}", category.getId());
@@ -46,9 +47,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategory(Long id) {
         categoryRepository.findById(id);
-
         if (!eventRepository.findByCategoryId(id).isEmpty()) {
-            throw new ImpossibleActionException("You can`t delete this category because it contains one or more events.");
+            throw new ConflictException("You can`t delete this category because it contains one or more events.");
         }
 
         categoryRepository.deleteById(id);
@@ -61,7 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.findById(id);
 
         if (categoryRepository.existsByName(categoryDto.getName())) {
-            throw new AlreadyExistsException("That name is taken");
+            throw new ConflictException("That name is taken");
         }
 
         Category category = categoryMapper.toCategory(categoryDto);
