@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByIdIn(List<Long> ids, Pageable pageable);
+
     Optional<User> deleteUserById(Long id);
 
     Boolean existsByEmail(String email);

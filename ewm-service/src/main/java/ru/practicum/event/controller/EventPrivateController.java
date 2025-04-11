@@ -1,7 +1,6 @@
 package ru.practicum.event.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +13,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users/{userId}/events")
-@Valid
 @RequiredArgsConstructor
 public class EventPrivateController {
     private final EventService eventService;
 
     @PostMapping
-    public ResponseEntity<EventFullDto> createEvent(@RequestBody NewEventDto newEventDto,
+    public ResponseEntity<EventFullDto> createEvent(@RequestBody @Valid NewEventDto newEventDto,
                                                     @PathVariable Long userId) {
         return new ResponseEntity<>(eventService.createEvent(userId, newEventDto), HttpStatus.CREATED);
     }
@@ -37,7 +35,7 @@ public class EventPrivateController {
     public ResponseEntity<EventFullDto> updateEvent(
             @PathVariable Long userId,
             @PathVariable Long eventId,
-            @RequestBody UpdateEventUserRequest userRequest) {
+            @RequestBody @Valid UpdateEventUserRequest userRequest) {
         return new ResponseEntity<>(eventService.updateEvent(userId, eventId, userRequest), HttpStatus.OK);
     }
 
@@ -58,10 +56,8 @@ public class EventPrivateController {
     public ResponseEntity<EventRequestStatusUpdateResult> confirmEventRequests(
             @PathVariable Long userId,
             @PathVariable Long eventId,
-            @RequestBody EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest
+            @RequestBody @Valid EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest
     ) {
         return new ResponseEntity<>(eventService.confirmEventRequest(userId, eventId, eventRequestStatusUpdateRequest), HttpStatus.OK);
     }
-
-
 }

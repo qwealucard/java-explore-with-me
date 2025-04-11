@@ -9,7 +9,6 @@ import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.exception.ValidationException;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.Request;
@@ -24,7 +23,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RequestServiceImpl implements RequestService{
+public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
@@ -51,32 +50,36 @@ public class RequestServiceImpl implements RequestService{
             return new NotFoundException("Event not found");
         });
 
-        if(requestRepository.existsByEventIdAndRequesterId(eventId, userId)) {
+        if (requestRepository.existsByEventIdAndRequesterId(eventId, userId)) {
             throw new ConflictException("You can't add a repeat request");
         }
 
-        if(userId.equals(event.getInitiator().getId())) {
+        if (userId.equals(event.getInitiator().getId())) {
             throw new ConflictException("The initiator of the event cannot add a request to participate in his event");
         }
 
-        if(event.getState() != EventState.PUBLISHED) {
+        if (event.getState() != EventState.PUBLISHED) {
             throw new ConflictException("This event is unpublished");
         }
 
-        if(event.getConfirmedRequests() >= event.getParticipantLimit()) {
+        if (event.getParticipantLimit() > 0 && event.getConfirmedRequests() >= event.getParticipantLimit()) {
             throw new ConflictException("The event has reached the limit of participation requests");
         }
 
-        if(!event.getRequestModeration()) {
-            event.setState(EventState.PUBLISHED);
-        }
         Request request = new Request();
         request.setCreated(LocalDateTime.now());
         request.setEvent(event);
         request.setRequester(user);
-        request.setStatus(RequestStatus.PENDING);
+        request.setStatus(event.getRequestModeration() && event.getParticipantLimit() > 0 ? RequestStatus.PENDING : RequestStatus.CONFIRMED);
 
-        return requestMapper.toParticipationRequestDto(requestRepository.save(request));
+        Request savedRequest = requestRepository.save(request);
+
+        if (request.getStatus() == RequestStatus.CONFIRMED) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+            eventRepository.save(event);
+        }
+
+        return requestMapper.toParticipationRequestDto(savedRequest);
     }
 
     @Override
@@ -88,17 +91,8 @@ public class RequestServiceImpl implements RequestService{
             return new NotFoundException("Request not found");
         });
 
-//        if (!request.getRequester().getId().equals(userId)) {
-//            throw new ValidationException("Only the creator can cancel the request.");
-//        }
-//        if (request.getStatus() == RequestStatus.CANCELED) {
-//            throw new ConflictException("Request has already been canceled");
-//        }
-
         request.setStatus(RequestStatus.CANCELED);
 
         return requestMapper.toParticipationRequestDto(requestRepository.save(request));
     }
-
-
 }

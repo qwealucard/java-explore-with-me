@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
@@ -12,7 +11,7 @@ import ru.practicum.category.service.CategoryService;
 
 @RestController
 @RequiredArgsConstructor
-@Validated
+@Valid
 @RequestMapping("admin/categories")
 public class CategoryAdminController {
     private final CategoryService categoryService;
@@ -33,5 +32,4 @@ public class CategoryAdminController {
     public void deleteCategory(@PathVariable Long catId) {
         categoryService.deleteCategory(catId);
     }
-
 }

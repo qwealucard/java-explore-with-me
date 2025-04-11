@@ -1,11 +1,9 @@
 package ru.practicum.event.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.cglib.core.Local;
 import ru.practicum.category.model.Category;
-import ru.practicum.request.model.RequestStatus;
 import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
@@ -28,17 +26,19 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String title;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
-    @Column(columnDefinition = "TEXT")
     private String description;
 
     private Boolean requestModeration;
 
     private Long participantLimit;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime publishedOn;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdOn;
 
     @ManyToOne
@@ -53,7 +53,6 @@ public class Event {
     @ManyToOne(cascade = CascadeType.MERGE)
     private Location location;
 
-    //@Column(name = "state", columnDefinition = "TEXT")
     @Enumerated(EnumType.STRING)
     private EventState state;
 

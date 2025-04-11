@@ -1,5 +1,6 @@
 package ru.practicum.event.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LocationDto {
+    @NotBlank
     private Float lat;
+    @NotBlank
     private Float lon;
 }

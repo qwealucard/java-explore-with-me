@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-@Component
+@Service
 public class StatsClient {
     private final RestClient restClient;
     private final String statsUrl;

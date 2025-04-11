@@ -1,20 +1,19 @@
 package ru.practicum.category.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.category.dto.CategoryDto;
-import ru.practicum.category.model.Category;
 import ru.practicum.category.service.CategoryService;
 
 import java.util.List;
 
 @RestController
-@Validated
+@Valid
 @RequiredArgsConstructor
 @RequestMapping("/categories")
 public class CategoryPublicController {
@@ -26,9 +25,8 @@ public class CategoryPublicController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getAllCategories(@RequestParam(defaultValue = "0", required = false)@PositiveOrZero Integer from,
-                                                              @RequestParam(defaultValue = "10", required = false)@Positive Integer size) {
+    public ResponseEntity<List<CategoryDto>> getAllCategories(@RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
+                                                              @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
         return new ResponseEntity<>(categoryService.getCategories(from, size), HttpStatus.OK);
     }
-
 }

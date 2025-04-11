@@ -2,14 +2,11 @@ package ru.practicum.event.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.LocationDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.model.Event;
-import ru.practicum.user.dto.UserShortDto;
 
 import java.util.List;
 
@@ -25,7 +22,7 @@ public interface EventMapper {
     @Mapping(target = "category", source = "category")
     @Mapping(target = "initiator", source = "initiator")
     @Mapping(target = "location", source = "location")
-    EventFullDto toEventFullDto(Event event, CategoryDto category, UserShortDto initiator, LocationDto location);
+    EventFullDto toEventFullDto(Event event);
 
     List<EventFullDto> toEventFullDto(List<Event> events);
 

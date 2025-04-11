@@ -2,7 +2,6 @@ package ru.practicum.category.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,13 +11,11 @@ import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.repository.EventRepository;
-import ru.practicum.exception.AlreadyExistsException;
 import ru.practicum.exception.ConflictException;
-import ru.practicum.exception.ImpossibleActionException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -55,19 +52,15 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("Delete category with ID {} by admin", id);
     }
 
-    @Transactional
-    @Override
-    public CategoryDto updateCategory(NewCategoryDto categoryDto, Long id) {
-        categoryRepository.findById(id);
-
-        if (categoryRepository.existsByName(categoryDto.getName())) {
-            throw new ConflictException("That name is taken");
+    public CategoryDto updateCategory(NewCategoryDto newCategoryDto, Long catId) {
+        categoryRepository.findById(catId);
+        Optional<Category> existingCategory = categoryRepository.findByName(newCategoryDto.getName());
+        if (existingCategory.isPresent() && !existingCategory.get().getId().equals(catId)) {
+            throw new ConflictException("This name is taken");
         }
-
-        Category category = categoryMapper.toCategory(categoryDto);
-        category.setId(id);
-        log.info("Category with ID {} has been updated by admin", id);
-        return categoryMapper.toCategoryDto(category);
+        Category category = categoryMapper.toCategory(newCategoryDto);
+        category.setId(catId);
+        return categoryMapper.toCategoryDto(categoryRepository.save(category));
     }
 
     @Transactional(readOnly = true)

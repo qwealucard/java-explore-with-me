@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
-import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
 
 import java.time.LocalDateTime;
@@ -23,7 +22,7 @@ public class EventAdminController {
 
     @GetMapping
     public List<EventFullDto> getEventById(@RequestParam(required = false) List<Long> userIds,
-                                           @RequestParam(required = false) EventState states,
+                                           @RequestParam(required = false) List<String> states,
                                            @RequestParam(required = false) List<Long> categories,
                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
@@ -33,8 +32,8 @@ public class EventAdminController {
     }
 
     @PatchMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> confirmRequest(@PathVariable Long eventId,
-                                                       @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+    public ResponseEntity<EventFullDto> updateEventByAdmin(@PathVariable Long eventId,
+                                                           @RequestBody @Valid UpdateEventAdminRequest updateEventAdminRequest) {
         return new ResponseEntity<>(eventService.updateEventByAdmin(eventId, updateEventAdminRequest), HttpStatus.OK);
     }
 }

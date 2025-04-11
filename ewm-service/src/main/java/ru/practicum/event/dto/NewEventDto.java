@@ -25,7 +25,7 @@ public class NewEventDto {
     @Size(min = 3, max = 120)
     String title;
 
-    @NotBlank
+    @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime eventDate;
 
@@ -42,7 +42,7 @@ public class NewEventDto {
     boolean paid;
 
     @PositiveOrZero
-    Integer participantLimit;
+    Integer participantLimit = 0;
 
     Boolean requestModeration = true;
 }

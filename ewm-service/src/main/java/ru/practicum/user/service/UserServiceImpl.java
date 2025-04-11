@@ -3,7 +3,6 @@ package ru.practicum.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exception.ConflictException;
@@ -14,7 +13,6 @@ import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -38,11 +36,10 @@ public class UserServiceImpl implements UserService {
                     .toList();
     }
 
-
     @Override
     @Transactional
     public UserDto createUser(NewUserRequest userRequest) {
-        if(userRepository.existsByEmail(userRequest.getEmail())) {
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new ConflictException("This email is taken");
         }
         User user = userRepository.save(userMapper.toUser(userRequest));

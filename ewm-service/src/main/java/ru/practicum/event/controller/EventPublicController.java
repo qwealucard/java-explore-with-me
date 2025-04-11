@@ -40,7 +40,7 @@ public class EventPublicController {
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> getEventById(@PathVariable Long eventId) {
-        return new ResponseEntity<>(eventService.getEventPublicById(eventId), HttpStatus.OK);
+    public ResponseEntity<EventFullDto> getEventById(@PathVariable Long eventId, HttpServletRequest httpServletRequest) {
+        return new ResponseEntity<>(eventService.getEventPublicById(eventId, httpServletRequest), HttpStatus.OK);
     }
 }

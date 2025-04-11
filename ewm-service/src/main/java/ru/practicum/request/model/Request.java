@@ -30,5 +30,4 @@ public class Request {
     private User requester;
 
     private RequestStatus status;
-
 }

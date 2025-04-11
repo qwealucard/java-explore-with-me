@@ -15,12 +15,13 @@ import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.NotFoundException;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CompilationServiceImpl implements CompilationService{
+public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
     private final CompilationMapper compilationMapper;
@@ -29,6 +30,9 @@ public class CompilationServiceImpl implements CompilationService{
     @Transactional
     public CompilationDto createCompilation(NewCompilationDto compilationDto) {
         List<Long> eventsIds = compilationDto.getEvents();
+        if (eventsIds == null) {
+            eventsIds = Collections.emptyList();
+        }
         List<Event> events = eventRepository.findAllById(eventsIds);
         Compilation compilation = compilationMapper.toCompilation(compilationDto, events);
         return compilationMapper.toCompilationDto(compilationRepository.save(compilation));
@@ -48,11 +52,11 @@ public class CompilationServiceImpl implements CompilationService{
             log.error("Compilation with ID {} not found", id);
             return new NotFoundException("Compilation not found");
         });
-        if(updateCompilationDto.getEvents() != null) {
+        if (updateCompilationDto.getEvents() != null) {
             existingCompilation.setEvents(eventRepository.findAllById(updateCompilationDto.getEvents()));
         }
 
-        if(updateCompilationDto.getTitle() != null) {
+        if (updateCompilationDto.getTitle() != null) {
             existingCompilation.setTitle(updateCompilationDto.getTitle());
         }
         existingCompilation.setPinned(updateCompilationDto.getPinned());
@@ -64,10 +68,9 @@ public class CompilationServiceImpl implements CompilationService{
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
         List<Compilation> compilations;
 
-        if(pinned != null) {
+        if (pinned != null) {
             compilations = compilationRepository.findAllByPinnedIs(pinned, PageRequest.of(from / size, size));
-        }
-        else {
+        } else {
             compilations = compilationRepository.findAll(PageRequest.of(from / size, size)).toList();
         }
         return compilationMapper.toCompilationDto(compilations);

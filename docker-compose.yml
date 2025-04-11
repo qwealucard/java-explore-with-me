@@ -5,12 +5,18 @@ services:
       - "9090:9090"
     depends_on:
       - stats-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=12345
   stats-db:
     image: postgres:16.1
+    ports:
+      - "9432:5432"
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: stats_db
+     - POSTGRES_USER=user
+     - POSTGRES_PASSWORD=12345
+     - POSTGRES_DB=stats_db
 
   ewm-service:
     build: ewm-service
@@ -18,12 +24,16 @@ services:
       - "8080:8080"
     depends_on:
       - ewm-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=12345
 
   ewm-db:
-    ports:
-      - "6432:5432"
     image: postgres:16.1
+    ports:
+      - "9433:5432"
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: ewm_db
+     - POSTGRES_USER=user
+     - POSTGRES_PASSWORD=12345
+     - POSTGRES_DB=ewm_db
