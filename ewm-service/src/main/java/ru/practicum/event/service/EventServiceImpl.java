@@ -38,7 +38,6 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -390,7 +389,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getEventsPublic(String text, List<Long> categories, Boolean paid,
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                               Boolean onlyAvailable, String sort, Integer from, Integer size) {
+                                               Boolean onlyAvailable, String sort, Integer from, Integer size,
+                                               HttpServletRequest httpServletRequest) {
 
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             throw new ValidationException("The beginning of the range cannot be later than its end");
@@ -441,6 +441,8 @@ public class EventServiceImpl implements EventService {
             }
         }
 
+        hit(httpServletRequest);
+
         Pageable pageable = PageRequest.of(from / size, size, sorting);
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
 
@@ -459,11 +461,9 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Event not found");
         }
         hit(httpServletRequest);
-        String startTime = String.valueOf(event.getPublishedOn());
-        String endTime = String.valueOf(LocalDateTime.now());
 
-        List<ViewStats> stats = statsClient.stats(startTime, endTime, List.of("/events/" + id), true);
-        Long views = stats.getFirst().getHits();
+        List<ViewStats> stats = statsClient.stats(event.getPublishedOn(), LocalDateTime.now(), List.of("/events/" + id), true);
+        Long views = stats.isEmpty() ? 0 : stats.getFirst().getHits();
         event.setViews(views);
         return eventMapper.toEventFullDto(event);
     }
@@ -485,7 +485,7 @@ public class EventServiceImpl implements EventService {
                 "main-server",
                 httpServletRequest.getRequestURI(),
                 httpServletRequest.getRemoteAddr(),
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                LocalDateTime.now()
         );
         statsClient.hit(hitRequest);
     }

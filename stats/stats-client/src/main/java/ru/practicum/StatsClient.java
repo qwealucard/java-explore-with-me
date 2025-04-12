@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -31,7 +32,7 @@ public class StatsClient {
                                                   .toBodilessEntity();
     }
 
-    public List<ViewStats> stats(String start, String end, List<String> uris, Boolean unique) {
+    public List<ViewStats> stats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         String uri = UriComponentsBuilder.fromHttpUrl(statsUrl)
                                          .path("/stats")
                                          .queryParam("start", start)

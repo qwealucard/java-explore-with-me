@@ -6,6 +6,7 @@ import ru.practicum.stats.Hit;
 import java.time.LocalDateTime;
 
 public class HitMapper {
+
     public static Hit toEntity(HitRequest hitDto) {
         return new Hit(
                 null,
@@ -13,6 +14,15 @@ public class HitMapper {
                 hitDto.getUri(),
                 hitDto.getIp(),
                 LocalDateTime.now()
+        );
+    }
+
+    public static HitRequest toHitRequestDto(Hit hit) {
+        return new HitRequest(
+                hit.getApp(),
+                hit.getUri(),
+                hit.getIp(),
+                hit.getTimestamp()
         );
     }
 }
