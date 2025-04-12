@@ -18,6 +18,7 @@ public interface HitRepository extends JpaRepository<Hit, Long> {
             "ORDER BY hits DESC")
     List<Object[]> findUniqueHitsWithUri(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end,
                                          @Param("uris") List<String> uris);
+
     @Query("SELECT h.app, h.uri, COUNT(DISTINCT h.ip) AS hits " +
             "FROM Hit h " +
             "WHERE h.timestamp BETWEEN :start AND :end " +
