@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.NewUserRequest;
@@ -23,7 +22,6 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getUsers(Integer from, Integer size, List<Long> ids) {
         List<User> users;
         if (ids == null || ids.isEmpty()) {
@@ -37,7 +35,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public UserDto createUser(NewUserRequest userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new ConflictException("This email is taken");
@@ -48,13 +45,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public void deleteUser(Long id) {
         if (userRepository.deleteUserById(id).isPresent()) {
             log.info("User with ID {} has been deleted", id);
         } else {
-            log.error("User with ID {} not found", id);
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("User with ID " + id + " not found");
         }
     }
 }

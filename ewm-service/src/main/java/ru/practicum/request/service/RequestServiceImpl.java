@@ -3,7 +3,6 @@ package ru.practicum.request.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
@@ -31,24 +30,19 @@ public class RequestServiceImpl implements RequestService {
     private final RequestMapper requestMapper;
 
 
-    @Transactional(readOnly = true)
     @Override
     public List<ParticipationRequestDto> getRequests(Long id) {
-        userRepository.findById(id);
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("User with Id " + id + " not found"));
         return requestMapper.toParticipationRequestDto(requestRepository.findByRequesterId(id));
     }
 
-    @Transactional
     @Override
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            log.error("User with ID {} not found", userId);
-            return new NotFoundException("User not found");
-        });
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> {
-            log.error("Event with ID {} not found", eventId);
-            return new NotFoundException("Event not found");
-        });
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with Id " + userId + " not found"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Event with ID " + eventId + " not found"));
 
         if (requestRepository.existsByEventIdAndRequesterId(eventId, userId)) {
             throw new ConflictException("You can't add a repeat request");
@@ -83,13 +77,11 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        userRepository.findById(userId);
-        Request request = requestRepository.findById(requestId).orElseThrow(() -> {
-            log.error("Request with ID {} not found", requestId);
-            return new NotFoundException("Request not found");
-        });
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with Id " + userId + " not found"));
+        Request request = requestRepository.findById(requestId).orElseThrow(() ->
+                new NotFoundException("Request with ID " + requestId + " not found"));
 
         request.setStatus(RequestStatus.CANCELED);
 

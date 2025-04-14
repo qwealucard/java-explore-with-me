@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.HitRequest;
 
 import ru.practicum.StatsClient;
@@ -59,17 +58,12 @@ public class EventServiceImpl implements EventService {
     private final StatsClient statsClient;
 
     @Override
-    @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto eventDto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            log.error("User with ID {} not found", userId);
-            return new NotFoundException("User not found");
-        });
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with ID " + userId + " not found"));
         UserShortDto userShortDto = userMapper.toUserShortDto(user);
-        Category category = categoryRepository.findById(eventDto.getCategory()).orElseThrow(() -> {
-            log.error("Category with ID{} not found", eventDto.getCategory());
-            return new NotFoundException("Category not found");
-        });
+        Category category = categoryRepository.findById(eventDto.getCategory()).orElseThrow(() ->
+                new NotFoundException("Category with ID " + eventDto.getCategory() + " not found"));
         CategoryDto categoryDto = categoryMapper.toCategoryDto(category);
         if (eventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ValidationException("The date and time of the event cannot be earlier than two hours from the current moment.");
@@ -87,31 +81,26 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EventShortDto> getUserEvents(Long userId, Integer from, Integer size) {
-        userRepository.findById(userId);
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with ID " + userId + " not found"));
         List<Event> events = eventRepository.findAllByInitiatorId(userId, PageRequest.of(from / size, size));
         return eventMapper.toEventShortDto(events);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public EventFullDto getEventById(Long eventId) {
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> {
-            log.error("Event with ID {} not found", eventId);
-            return new NotFoundException("Event not found");
-        });
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Event with ID " + eventId + " not found"));
         return eventMapper.toEventFullDto(event);
     }
 
     @Override
-    @Transactional
     public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest updateEvent) {
-        userRepository.findById(userId);
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> {
-            log.error("Event with ID {} not found", eventId);
-            return new NotFoundException("Event not found");
-        });
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with ID " + userId + " not found"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Event with ID " + eventId + " not found"));
 
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("You are not the creator of the event");
@@ -186,13 +175,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
-        userRepository.findById(userId);
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> {
-            log.error("Event with ID {} not found", eventId);
-            return new NotFoundException("Event not found");
-        });
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with ID " + userId + " not found"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Event with ID " + eventId + " not found"));
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ValidationException("List of requests is available only to the initiator of the event");
         }
@@ -202,13 +189,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional
     public EventRequestStatusUpdateResult confirmEventRequest(Long userId, Long eventId, EventRequestStatusUpdateRequest updateDto) {
-        userRepository.findById(userId);
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> {
-            log.error("Event with ID {} not found", eventId);
-            return new NotFoundException("Event not found");
-        });
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with ID " + userId + " not found"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Event with ID " + eventId + " not found"));
 
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("Only the initiator of the event can update requests.");
@@ -268,7 +253,6 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    @Transactional
     public List<EventFullDto> getEvents(List<Long> userIds, List<String> states, List<Long> categories,
                                         LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
         Specification<Event> spec = (root, query, criteriaBuilder) -> {
@@ -306,12 +290,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest eventDto) {
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> {
-            log.error("Event with ID {} not found", eventId);
-            return new NotFoundException("Event not found");
-        });
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Event with ID " + eventId + " not found"));
 
         if (event.getState() != EventState.PENDING && event.getState() != EventState.PUBLISHED) {
             throw new ConflictException("Administrator can only update events in the PENDING or PUBLISHED state.");
@@ -450,15 +431,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public EventFullDto getEventPublicById(Long id, HttpServletRequest httpServletRequest) {
-        Event event = eventRepository.findById(id).orElseThrow(() -> {
-            log.error("Event with ID {} not found", id);
-            return new NotFoundException("Event not found");
-        });
+        Event event = eventRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Event with ID " + id + " not found"));
         if (event.getState() != EventState.PUBLISHED) {
-            log.error("Event with ID {} not found", id);
-            throw new NotFoundException("Event not found");
+            throw new NotFoundException("Event with ID " + id + " not found");
         }
         hit(httpServletRequest);
 

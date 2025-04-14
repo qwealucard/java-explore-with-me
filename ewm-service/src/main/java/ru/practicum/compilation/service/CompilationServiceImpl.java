@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.UpdateCompilationDto;
@@ -27,7 +26,6 @@ public class CompilationServiceImpl implements CompilationService {
     private final CompilationMapper compilationMapper;
 
     @Override
-    @Transactional
     public CompilationDto createCompilation(NewCompilationDto compilationDto) {
         List<Long> eventsIds = compilationDto.getEvents();
         if (eventsIds == null) {
@@ -39,19 +37,16 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    @Transactional
     public void deleteCompilation(Long id) {
-        compilationRepository.findById(id);
+        Compilation compilation = compilationRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Compilation with ID " + id + " not found"));
         compilationRepository.deleteById(id);
     }
 
     @Override
-    @Transactional
     public CompilationDto updateCompilation(UpdateCompilationDto updateCompilationDto, Long id) {
-        Compilation existingCompilation = compilationRepository.findById(id).orElseThrow(() -> {
-            log.error("Compilation with ID {} not found", id);
-            return new NotFoundException("Compilation not found");
-        });
+        Compilation existingCompilation = compilationRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Compilation with ID " + id + " not found"));
         if (updateCompilationDto.getEvents() != null) {
             existingCompilation.setEvents(eventRepository.findAllById(updateCompilationDto.getEvents()));
         }
@@ -64,7 +59,6 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
         List<Compilation> compilations;
 
@@ -77,12 +71,9 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public CompilationDto getCompilationById(Long id) {
-        Compilation compilation = compilationRepository.findById(id).orElseThrow(() -> {
-            log.error("Compilation with ID {} not found", id);
-            return new NotFoundException("Compilation not found");
-        });
+        Compilation compilation = compilationRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Compilation with ID " + id + " not found"));
 
         return compilationMapper.toCompilationDto(compilation);
     }
