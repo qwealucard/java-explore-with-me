@@ -52,9 +52,11 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(NewCategoryDto newCategoryDto, Long catId) {
         Category testCategory = categoryRepository.findById(catId).orElseThrow(() ->
                 new NotFoundException("Category with ID " + catId + " not found"));
-        if (categoryRepository.existsByName(newCategoryDto.getName())) {
-            throw new ConflictException("This name is already taken");
-        }
+        categoryRepository.findByName(newCategoryDto.getName())
+                          .filter(existingCat -> !existingCat.getId().equals(catId))
+                          .ifPresent(existingCat -> {
+                              throw new ConflictException("This name is taken");
+                          });
         Category category = categoryMapper.toCategory(newCategoryDto);
         category.setId(catId);
         return categoryMapper.toCategoryDto(categoryRepository.save(category));
