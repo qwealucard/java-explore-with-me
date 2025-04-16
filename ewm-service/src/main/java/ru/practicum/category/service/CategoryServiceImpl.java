@@ -42,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Category with ID " + id + " not found"));
         if (!eventRepository.findByCategoryId(id).isEmpty()) {
-            throw new ConflictException("You can`t delete this category because it contains one or more events.");
+            throw new ConflictException("You can`t delete this category because it contains one or more events");
         }
 
         categoryRepository.deleteById(id);
