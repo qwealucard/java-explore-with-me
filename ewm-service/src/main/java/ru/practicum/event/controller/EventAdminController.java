@@ -26,8 +26,8 @@ public class EventAdminController {
                                            @RequestParam(required = false) List<Long> categories,
                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-                                           @RequestParam(name = "from", required = false, defaultValue = "0") Integer from,
-                                           @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
+                                           @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                           @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return eventService.getEvents(userIds, states, categories, rangeStart, rangeEnd, from, size);
     }
 

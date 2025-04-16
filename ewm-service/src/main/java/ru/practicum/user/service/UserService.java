@@ -6,14 +6,12 @@ import ru.practicum.user.dto.UserDto;
 
 import java.util.List;
 
+@Transactional
 public interface UserService {
 
-    @Transactional(readOnly = true)
     List<UserDto> getUsers(Integer from, Integer size, List<Long> ids);
 
-    @Transactional
     UserDto createUser(NewUserRequest userRequest);
 
-    @Transactional
     void deleteUser(Long id);
 }

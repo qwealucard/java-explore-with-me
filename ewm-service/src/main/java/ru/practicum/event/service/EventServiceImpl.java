@@ -368,12 +368,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getEventsPublic(String text, List<Long> categories, Boolean paid,
-                                               LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                               Boolean onlyAvailable, String sort, Integer from, Integer size,
-                                               HttpServletRequest httpServletRequest) {
+    public List<EventShortDto> getEventsPublic(EventPublicFilter filter) {
 
-        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+        if (filter.getRangeStart() != null && filter.getRangeEnd() != null && filter.getRangeStart().isAfter(filter.getRangeEnd())) {
             throw new ValidationException("The beginning of the range cannot be later than its end");
         }
 
@@ -381,38 +378,38 @@ public class EventServiceImpl implements EventService {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(criteriaBuilder.equal(root.get("state"), EventState.PUBLISHED));
 
-            if (text != null && !text.isBlank()) {
-                String pattern = "%%" + text.toLowerCase() + "%%";
+            if (filter.getText() != null && !filter.getText().isBlank()) {
+                String pattern = "%%" + filter.getText().toLowerCase() + "%%";
                 predicates.add(criteriaBuilder.or(
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("annotation")), pattern),
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), pattern)
                 ));
             }
 
-            if (categories != null && !categories.isEmpty()) {
-                predicates.add(root.get("category").get("id").in(categories));
+            if (filter.getCategories() != null && !filter.getCategories().isEmpty()) {
+                predicates.add(root.get("category").get("id").in(filter.getCategories()));
             }
 
-            if (paid != null) {
-                predicates.add(criteriaBuilder.equal(root.get("paid"), paid));
+            if (filter.getPaid() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("paid"), filter.getPaid()));
             }
 
-            if (rangeStart != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
+            if (filter.getRangeStart() != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"), filter.getRangeStart()));
             }
 
-            if (rangeEnd != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
+            if (filter.getRangeEnd() != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("eventDate"), filter.getRangeEnd()));
             }
 
-            if (onlyAvailable != null && onlyAvailable) {
+            if (filter.getOnlyAvailable() != null && filter.getOnlyAvailable()) {
                 predicates.add(criteriaBuilder.greaterThan(root.get("participantLimit"), 0));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        EventSort eventSort = sort != null ? EventSort.valueOf(sort.toUpperCase()) : null;
+        EventSort eventSort = filter.getSort() != null ? EventSort.valueOf(filter.getSort().toUpperCase()) : null;
         Sort sorting = Sort.unsorted();
         if (eventSort != null) {
             if (eventSort == EventSort.EVENT_DATE) {
@@ -422,9 +419,9 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        hit(httpServletRequest);
+        hit(filter.getHttpServletRequest());
 
-        Pageable pageable = PageRequest.of(from / size, size, sorting);
+        Pageable pageable = PageRequest.of(filter.getFrom() / filter.getSize(), filter.getSize(), sorting);
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
 
         return eventMapper.toEventShortDto(events);

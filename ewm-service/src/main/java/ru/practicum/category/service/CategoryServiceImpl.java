@@ -14,7 +14,6 @@ import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -53,9 +52,10 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(NewCategoryDto newCategoryDto, Long catId) {
         Category testCategory = categoryRepository.findById(catId).orElseThrow(() ->
                 new NotFoundException("Category with ID " + catId + " not found"));
-        Optional<Category> existingCategory = categoryRepository.findByName(newCategoryDto.getName());
-        if (existingCategory.isPresent() && !existingCategory.get().getId().equals(catId)) {
-            throw new ConflictException("This name is taken");
+        Category existingCategory = categoryRepository.findByName(newCategoryDto.getName()).orElseThrow(() ->
+                new NotFoundException("Category with ID " + catId + " not found"));
+        if (existingCategory != null && !existingCategory.getId().equals(catId)) {
+            throw new ConflictException("This name is already taken");
         }
         Category category = categoryMapper.toCategory(newCategoryDto);
         category.setId(catId);

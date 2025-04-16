@@ -7,20 +7,16 @@ import ru.practicum.compilation.dto.UpdateCompilationDto;
 
 import java.util.List;
 
+@Transactional
 public interface CompilationService {
 
-    @Transactional
     CompilationDto createCompilation(NewCompilationDto compilationDto);
 
-    @Transactional
     void deleteCompilation(Long id);
 
-    @Transactional
     CompilationDto updateCompilation(UpdateCompilationDto updateCompilationDto, Long id);
 
-    @Transactional(readOnly = true)
     List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size);
 
-    @Transactional(readOnly = true)
     CompilationDto getCompilationById(Long id);
 }

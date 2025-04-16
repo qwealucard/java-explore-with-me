@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
+import ru.practicum.event.dto.EventPublicFilter;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.service.EventService;
 
@@ -34,10 +35,22 @@ public class EventPublicController {
                                          @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                          @RequestParam(required = false) String sort,
                                          @RequestParam(defaultValue = "0") @Min(value = 0) Integer from,
-                                         @RequestParam(defaultValue = "10") Integer size, HttpServletRequest httpServletRequest)  {
+                                         @RequestParam(defaultValue = "10") Integer size, HttpServletRequest httpServletRequest) {
 
-        return eventService.getEventsPublic(
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, httpServletRequest);
+        EventPublicFilter filter = EventPublicFilter.builder()
+                                                    .text(text)
+                                                    .categories(categories)
+                                                    .paid(paid)
+                                                    .rangeStart(rangeStart)
+                                                    .rangeEnd(rangeEnd)
+                                                    .onlyAvailable(onlyAvailable)
+                                                    .sort(sort)
+                                                    .from(from)
+                                                    .size(size)
+                                                    .httpServletRequest(httpServletRequest)
+                                                    .build();
+
+        return eventService.getEventsPublic(filter);
     }
 
     @GetMapping("/{eventId}")

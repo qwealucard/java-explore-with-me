@@ -5,14 +5,12 @@ import ru.practicum.request.dto.ParticipationRequestDto;
 
 import java.util.List;
 
+@Transactional
 public interface RequestService {
 
-    @Transactional(readOnly = true)
     List<ParticipationRequestDto> getRequests(Long id);
 
-    @Transactional
     ParticipationRequestDto createRequest(Long userId, Long eventId);
 
-    @Transactional
     ParticipationRequestDto cancelRequest(Long userId, Long requestId);
 }
