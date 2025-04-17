@@ -1,0 +1,90 @@
+package ru.practicum.request.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import ru.practicum.event.model.Event;
+import ru.practicum.event.model.EventState;
+import ru.practicum.event.repository.EventRepository;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.NotFoundException;
+import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.request.mapper.RequestMapper;
+import ru.practicum.request.model.Request;
+import ru.practicum.request.model.RequestStatus;
+import ru.practicum.request.repository.RequestRepository;
+import ru.practicum.user.model.User;
+import ru.practicum.user.repository.UserRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class RequestServiceImpl implements RequestService {
+
+    private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
+    private final EventRepository eventRepository;
+    private final RequestMapper requestMapper;
+
+
+    @Override
+    public List<ParticipationRequestDto> getRequests(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("User with Id " + id + " not found"));
+        return requestMapper.toParticipationRequestDto(requestRepository.findByRequesterId(id));
+    }
+
+    @Override
+    public ParticipationRequestDto createRequest(Long userId, Long eventId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with Id " + userId + " not found"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Event with ID " + eventId + " not found"));
+
+        if (requestRepository.existsByEventIdAndRequesterId(eventId, userId)) {
+            throw new ConflictException("You can't add a repeat request");
+        }
+
+        if (userId.equals(event.getInitiator().getId())) {
+            throw new ConflictException("The initiator of the event cannot add a request to participate in his event");
+        }
+
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new ConflictException("This event is unpublished");
+        }
+
+        if (event.getParticipantLimit() > 0 && event.getConfirmedRequests() >= event.getParticipantLimit()) {
+            throw new ConflictException("The event has reached the limit of participation requests");
+        }
+
+        Request request = new Request();
+        request.setCreated(LocalDateTime.now());
+        request.setEvent(event);
+        request.setRequester(user);
+        request.setStatus(event.getRequestModeration() && event.getParticipantLimit() > 0 ? RequestStatus.PENDING : RequestStatus.CONFIRMED);
+
+        Request savedRequest = requestRepository.save(request);
+
+        if (request.getStatus() == RequestStatus.CONFIRMED) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+            eventRepository.save(event);
+        }
+
+        return requestMapper.toParticipationRequestDto(savedRequest);
+    }
+
+    @Override
+    public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User with Id " + userId + " not found"));
+        Request request = requestRepository.findById(requestId).orElseThrow(() ->
+                new NotFoundException("Request with ID " + requestId + " not found"));
+
+        request.setStatus(RequestStatus.CANCELED);
+
+        return requestMapper.toParticipationRequestDto(requestRepository.save(request));
+    }
+}

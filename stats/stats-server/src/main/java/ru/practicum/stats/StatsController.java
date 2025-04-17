@@ -1,8 +1,9 @@
 package ru.practicum.stats;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.HitRequest;
 import ru.practicum.ViewStats;
@@ -17,18 +18,18 @@ public class StatsController {
     private final StatsService statsService;
 
     @PostMapping("/hit")
-    public ResponseEntity<Void> hit(@RequestBody HitRequest hitRequest) {
-        statsService.hit(hitRequest);
-        return ResponseEntity.ok().build();
+    @ResponseStatus(HttpStatus.CREATED)
+    public HitRequest hit(@RequestBody @Valid HitRequest hitRequest) {
+        return statsService.hit(hitRequest);
     }
 
     @GetMapping("/stats")
     public List<ViewStats> stats(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+            @RequestParam("start") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startStr,
+            @RequestParam("end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endStr,
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") Boolean unique) {
 
-        return statsService.stats(start, end, uris, unique);
+        return statsService.stats(startStr, endStr, uris, unique);
     }
 }
