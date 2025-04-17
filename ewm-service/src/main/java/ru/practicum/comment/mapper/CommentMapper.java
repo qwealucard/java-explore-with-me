@@ -13,7 +13,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "author", source = "user")
+    @Mapping(target = "user", source = "user")
     @Mapping(target = "event", source = "event")
     Comment toComment(CommentRequest commentRequest, User user, Event event);
 

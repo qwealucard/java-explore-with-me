@@ -23,14 +23,14 @@ public class Comment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "author_id")
-    private User author;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
 
-    private LocalDateTime publishedTime;
+    private LocalDateTime created;
 
     private String text;
 }

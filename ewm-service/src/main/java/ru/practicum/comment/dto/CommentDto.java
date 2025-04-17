@@ -19,13 +19,13 @@ import java.time.LocalDateTime;
 public class CommentDto {
     private Long id;
 
-    private UserShortDto author;
+    private UserShortDto user;
 
     private EventShortDto event;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @FutureOrPresent
-    private LocalDateTime publishedTime;
+    private LocalDateTime created;
 
     @Size(max = 7000)
     private String text;
